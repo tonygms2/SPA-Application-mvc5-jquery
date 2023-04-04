@@ -1,0 +1,46 @@
+﻿<div id="mainContainer" class=".bg-secondary.bg-gradient container ">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <div id="mainContainerBody" class="row mb-3">
+                        <div class="mt-5 col">
+                            <label for="UserID" class="form-label">User ID:</label>
+                            <input type="text" class="form-control" name="UserID" id="UserID" required>
+                        </div>
+                        <div class="col">
+                            <label for="FirstName" class="form-label">First Name:</label>
+                            <input type="text" class="form-control" name="FirstName" id="FirstName" required>
+                        </div>
+                        <div class="col">
+                            <label for="LastName" class="form-label">Last Name: </label>
+                            <input type="text" class="form-control" name="LastName" id="LastName" required>
+                        </div>
+                        <div class="col">
+                            <label for="Email" class="form-label">Email: </label>
+                            <input type="email" class="form-control" name="Email" id="Email" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button id="addBtn" class="btn btn-primary" type="submit">Add User</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="userTable" class="mt-1 table table-bordered table-dark">
+        <tr>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Email</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tbody id="userTableBody">
+        </tbody>
+    </table>
+
+    <div class="row justify-content-center mt-4" id="userCard"></div>
+</div>
