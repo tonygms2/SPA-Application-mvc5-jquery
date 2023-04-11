@@ -9,7 +9,7 @@
    
     <!-- Bootstrap CSS -->
     @Styles.Render("~/Content/css")
-
+<link href="https://cdn.datatables.net/v/dt/dt-1.13.4/datatables.min.css" rel="stylesheet" />
     <!-- Modernizr JS -->
     @Scripts.Render("~/bundles/modernizr")
 
@@ -36,8 +36,10 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/v/dt/dt-1.13.4/datatables.min.js"></script>
     <script src="~/Scripts/addUser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @RenderSection("scripts", required: false)
 </body>
 </html>

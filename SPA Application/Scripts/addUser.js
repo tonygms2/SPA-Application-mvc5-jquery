@@ -1,71 +1,122 @@
-﻿$("#addBtn").on("click", function (e) {
-    // Get the input values
-    let userID = $("#UserID").val();
-    let firstName = $("#FirstName").val();
-    let lastName = $("#LastName").val();
-    let email = $("#Email").val();
+﻿//All the event handlers are being ready when the document loads.
+$(function () {
+    $("#mainContainer").css("margin-top", "15px");
 
-    // Check that input fields are not empty
-    if (!userID || !firstName || !lastName || !email) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Please fill all the fields',
-        })
-        return;
-    }
+    $("#mainContainerBody,#addBtn").css("margin-bottom", "15px");
+    $("#home").click(function () {
+        window.location.href = "/Home/Index";
+    });
+    $("#about").click(function () {
+        window.location.href = "/Home/About";
+    });
 
-    let requestData = {
-        UserId: userID,
-        FirstName: firstName,
-        LastName: lastName,
-        Email: email
-    }
+    $(".check-login").click(function () {
+        $("#myModal").modal('show');
+        /*showLoginForm();*/
+    });
 
+  
+
+    $("a").hover(
+        function () {
+            $(this).css("cursor", "pointer");
+        },
+        function () {
+            $(this).css("cursor", "auto");
+        }
+    );
+    //Runs the first time and loads any data from the list if there are any.
     $.ajax({
-        url: "/User/AddUser",
-        method: "POST",
-        data: requestData,
+        url: "/User/ShowAllUser",
+        method: "GET",
         success: function (data) {
             let userCards = data.map((item) => generateUserTable(item));
             $("#userTableBody").html(userCards);
-
-            Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: 'User has been saved',
-                showConfirmButton: false,
-                timer: 1500
-            })
-            // Clear input fields
-            $("#UserID").val('');
-            $("#FirstName").val('');
-            $("#LastName").val('');
-            $("#Email").val('');
         },
         error: function (error) {
             console.error(error);
         }
     });
+
+    $(".login-button").on("click", function (e) {
+        /*showLoginModal()*/
+        let login = $('#username').val();
+        let password = $('#password').val();
+        console.log(login, password);
+
+        if (!login || !password) {
+            $("#myModal").modal('hide');
+            $("#errorModal").modal('show');
+            $('#username').val('');
+            $('#password').val('');
+        } else if (login !== 'admin' || password !== 'admin') {
+            $("#myModal").modal('hide');
+            $("#errorModal_1").modal('show');
+            $('#username').val('');
+            $('#password').val('');
+        } else {
+            // Redirect to another URL
+            window.location.href = "/User/Index";
+        }
+    });
+
+    //Add functionality to add user.
+    $("#addBtn").on("click", function (e) {
+        // Get the input values
+        let userID = $("#UserID").val();
+        let firstName = $("#FirstName").val();
+        let lastName = $("#LastName").val();
+        let email = $("#Email").val();
+
+        // Check that input fields are not empty
+        if (!userID || !firstName || !lastName || !email) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please fill all the fields',
+            })
+            return;
+        }
+        //Pass the requestData with the value from input field to pass the json Data.
+        let requestData = {
+            UserId: userID,
+            FirstName: firstName,
+            LastName: lastName,
+            Email: email
+        }
+        
+        //Adds the json Data using POST method at /User/AddUser
+        $.ajax({
+            url: "/User/AddUser",
+            method: "POST",
+            data: requestData,
+            success: function (data) {
+                let userCards = data.map((item) => generateUserTable(item));
+                $("#userTableBody").html(userCards);
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'User has been saved',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                // Clear input fields
+                $("#UserID").val('');
+                $("#FirstName").val('');
+                $("#LastName").val('');
+                $("#Email").val('');
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
 });
 
-//function generateUserCard(user) {
-//    let card = '';
-//    card += '<div class="col-md-3 border border-primary mb-3">';
-//    card += '<div class="card shadow-sm h-100">';
-//    card += '<div class="card-body">';
-//    card += '<h5 class="card-title fw-bold mb-1">' + user.FirstName + ' ' + user.LastName + '</h5>';
-//    card += '<h6 class="card-subtitle mb-3 text-muted">' + user.UserID + '</h6>';
-//    card += '<p class="card-text fs-5">' + user.Email + '</p>';
-//    card += '<div class="btn-group">';
-//    card += '<button type="button" class="btn btn-outline-primary" id="editUser" onclick="editUser(' + user.UserID + ')">Edit</button>';
-//    card += '<button type="button" class="btn btn-outline-danger" onclick="deleteUser(' + user.UserID + ')"  id="deleteUser" userid="' + user.UserID + '">Delete</button>';
-//    card += '</div>';
-//    card += '</div></div></div>';
 
-//    return card;
-//}
 
+//Generates each row of the UserTable
 function generateUserTable(user) {
     let row = '<tr>';
     row += '<td>' + user.UserID + '</td>';
@@ -77,79 +128,7 @@ function generateUserTable(user) {
     return row;
 }
 
-$(document).ready(function () {
-    $("#home").click(function () {
-        window.location.href = "/Home/Index";
-    });
-    $("#about").click(function () {
-        window.location.href = "/Home/About";
-    });
-
-    $("#create-user-btn").click(function () {
-        showLoginForm();
-    });
-    $("#edit-user-btn").click(function () {
-        showLoginForm();
-    });
-    $("#delete-user-btn").click(function () {
-        showLoginForm();
-    });
-    $("#all-user-btn").click(function () {
-        showLoginForm();
-    });
-
-    $("#mainContainer").css("margin-top", "15px");
-    $("#addBtn").css("margin-bottom", "15px");
-
-    $("#mainContainerBody").css("margin-bottom", "15px");
-
-    $("a").hover(
-        function () {
-            $(this).css("cursor", "pointer");
-        },
-        function () {
-            $(this).css("cursor", "auto");
-        }
-    );
-});
-
-//function editUser(userId) {
-//    $("#editUser").on("click", function (e) {
-//        let requestData = {
-//            UserId: $("#UserID").val(),
-//            FirstName: $("#FirstName").val(),
-//            LastName: $("#LastName").val(),
-//            Email: $("#Email").val()
-//        }
-
-//        $.ajax({
-//            url: "/User/EditUser",
-//            method: "POST",
-//            data: requestData,
-//            success: function (data) {
-//                let userCards = data.map((item) => generateUserCard(item));
-//                $("#userCard").html(userCards);
-
-//                Swal.fire({
-//                    position: 'top-end',
-//                    icon: 'success',
-//                    title: 'User has been updated',
-//                    showConfirmButton: false,
-//                    timer: 1500
-//                })
-//                // Clear input fields
-//                $("#UserID").val('');
-//                $("#FirstName").val('');
-//                $("#LastName").val('');
-//                $("#Email").val('');
-//            },
-//            error: function (error) {
-//                console.error(error);
-//            }
-//        });
-//    });
-//}
-
+//Delete user and show popup after success or else show error.
 function deleteUser(userId) {
     $.ajax({
         url: "/User/RemoveUser",
@@ -172,76 +151,53 @@ function deleteUser(userId) {
         }
     });
 }
+//Show login form using Swal, if login complete will redirect to User/Index
+//function showLoginForm() {
+//    Swal.fire({
+//        title: 'Please login to continue',
+//        html: `<input type="text" id="login" class="swal2-input" placeholder="Username">
+//  <input type="password" id="password" class="swal2-input" placeholder="Password">`,
+//        confirmButtonText: 'Sign in',
+//        focusConfirm: false,
+//        preConfirm: () => {
+//            const login = $('#login').val();
+//            const password = $('#password').val();
+//            if (!login || !password) {
+//                Swal.showValidationMessage(`Please enter login and password`)
+//            } else {
+//                // Check if the username and password match
+//                if (login !== 'admin' || password !== 'admin') {
+//                    Swal.showValidationMessage(`Invalid login or password`)
+//                } else {
+//                    return true;
+//                }
+//            }
+//        }
+//    }).then((result) => {
+//        if (result.isConfirmed) {
+//            // Redirect to another URL
+//            window.location.href = "/User/Index";
+//        }
+//    })
+//}
 
-function showLoginForm() {
-    Swal.fire({
-        title: 'Please login to continue',
-        html: `<input type="text" id="login" class="swal2-input" placeholder="Username">
-  <input type="password" id="password" class="swal2-input" placeholder="Password">`,
-        confirmButtonText: 'Sign in',
-        focusConfirm: false,
-        preConfirm: () => {
-            const login = $('#login').val();
-            const password = $('#password').val();
-            if (!login || !password) {
-                Swal.showValidationMessage(`Please enter login and password`)
+function showLoginModal() {
+    // Event listener for login button click
+    $('#login-button').on('click', function () {
+        const login = $('#username').val();
+        const password = $('#password').val();
+        console.log(login, password)
+        if (!login || !password) {
+            /*Swal.showValidationMessage(`Please enter login and password`);*/
+            alert("`Please enter login and password`");
+        } else {
+            // Check if the username and password match
+            if (login !== 'admin' || password !== 'admin') {
+                Swal.showValidationMessage(`Invalid login or password`);
             } else {
-                // Check if the username and password match
-                if (login !== 'admin' || password !== 'admin') {
-                    Swal.showValidationMessage(`Invalid login or password`)
-                } else {
-                    return true;
-                }
+                // Redirect to another URL
+                window.location.href = "/User/Index";
             }
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Redirect to another URL
-            window.location.href = "/User/Index";
-        }
-    })
-}
-
-//$("#deleteUser").on("click", function (e) {
-//    console.log("test");
-//})
-
-$(document).ready(function () {
-    $.ajax({
-        url: "/User/ShowAllUser",
-        method: "GET",
-        success: function (data) {
-            let userCards = data.map((item) => generateUserTable(item));
-            $("#userTableBody").html(userCards);
-        },
-        error: function (error) {
-            console.error(error);
-        }
     });
-});
-
-//function showLoginModal() {
-//    $("#modalLoginForm").modal("show");
-//}
-
-//$("#login-btn").on("click", function (e) {
-//    login();
-//});
-
-//// Function to handle login
-//function login() {
-//    const login = $('#defaultForm-email').val();
-//    const password = $('#defaultForm-pass').val();
-//    console.log(login, password);
-//    if (!login || !password) {
-//        swal("Error", "Please enter both username and password", "error");
-//    } else {
-//        // Check if the username and password match
-//        if (login !== 'admin' || password !== 'admin') {
-//            swal("Success", "You have successfully logged in", "success");
-//            $("modalLoginForm").modal("hide");
-//        } else {
-//            return true;
-//        }
-//    }
-//}
+}
