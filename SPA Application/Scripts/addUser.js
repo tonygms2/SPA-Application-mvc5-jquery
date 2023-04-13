@@ -30,7 +30,6 @@ $(function () {
         /*showLoginModal()*/
         let login = $('#username').val();
         let password = $('#password').val();
-        
 
         if (!login || !password) {
             $("#myModal").modal('hide');
@@ -114,7 +113,7 @@ function loadUser() {
             { "title": "Email", data: "Email" },
             {
                 "data": "delete", "render": function (data, type, row, meta) {
-                    console.log(row.UserID)
+                    
                     return '<button type="button" class="btn btn-danger delete-btn" onclick="deleteUser(' + row.UserID + ')"  id="deleteUser" ' + row.UserID + '">Delete</button>';
                 }
             }
@@ -126,28 +125,51 @@ function loadUser() {
             'excelHtml5',
             'csvHtml5',
             {
-                extend: 'pdfHtml5', title: "The Christian Co-operative Credit Union Ltd., Dhaka",
+                //works on pdf button for now
+                extend: 'pdfHtml5',
+                title: "The Christian Co-operative Credit Union Ltd., Dhaka",
                 exportOptions: {
                     columns: [0, 1, 2, 3]
+                },
+                footer: true,
+
+                action: function (e, dt, button, config) {
+                    
+                    //will check if the data table is empty or not. 
+                    if (dt.rows().count() === 0) {
+                        alert('No data to export');
+                    } else {
+
+                         // Call the default csvHtml5 action method to create the CSV file
+                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                      
+                    }
+                },
+                //code for table width
+                customize: function (doc) {
+                    doc.content[1].table.widths = [
+                        "25%",
+                        "25%",
+                        "25%",
+                        "25%"
+                    ],
+                        //Code for footer
+                        doc['footer'] = (function (page, pages) {
+                            return {
+                                columns: [
+                                    `Page number ${page} out of ${pages}`,
+                                 
+                                ],
+                                margin: [10, 0],
+                                alignment: 'center'
+                            }
+                        });
+
+
                 }
             }
-            
         ]
     });
-
-    
-}
-
-//Generates each row of the UserTable
-function generateUserTable(user) {
-    let row = '<tr>';
-    row += '<td>' + user.UserID + '</td>';
-    row += '<td>' + user.FirstName + ' ' + user.LastName + '</td>';
-    row += '<td>' + user.Email + '</td>';
-    row += '<td><button type="button" class="btn btn-warning" onclick="editUser(' + user.UserID + ')">Edit</button></td>';
-    row += '<td><button type="button" class="btn btn-danger" onclick="deleteUser(' + user.UserID + ')"  id="deleteUser" ' + user.UserID + '">Delete</button></td>';
-    row += '</tr>';
-    return row;
 }
 
 //Delete user and show popup after success or else show error.
@@ -183,7 +205,6 @@ function showLoginModal() {
 
         const login = $username.val().trim();
         const password = $password.val().trim();
-       
 
         if (!login || !password) {
             $errorModal.find('.modal-body').text('Please enter a username and password.');
