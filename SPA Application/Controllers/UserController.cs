@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Newtonsoft.Json;
 using SPA_Application.Models;
 
 namespace SPA_Application.Controllers
@@ -27,16 +28,34 @@ namespace SPA_Application.Controllers
         }
 
         //return all JSON Result
+        [HttpPost]
         public JsonResult ShowAllUser()
         {
-            return Json(userList, JsonRequestBehavior.AllowGet);
+            string message = "success";
+
+            var totalRecords = userList.Count();
+
+            int recFilter = userList.Count();
+
+            string json = JsonConvert.SerializeObject(userList, Formatting.None);
+            var js = new
+            {
+                recordsTotal = totalRecords,
+                recordsFiltered = recFilter,
+                data = json,
+                message = message,
+                success = Convert.ToBoolean(message != "success" ? false : true)
+            };
+            var jsonResult = this.Json(js, JsonRequestBehavior.AllowGet);
+
+            return jsonResult;
         }
 
         public User GetUserById(int userId)
         {
             foreach (User user in userList)
             {
-                if (user.UserID == userId)
+                if (int.Parse(user.UserID) == userId)
                 {
                     return user;
                 }
@@ -74,7 +93,7 @@ namespace SPA_Application.Controllers
         [HttpPost]
         public JsonResult EditUser(User user)
         {
-            User existingUser = GetUserById(user.UserID);
+            User existingUser = GetUserById(int.Parse(user.UserID));
             if (existingUser != null)
             {
                 // Update the existing user with the new values
