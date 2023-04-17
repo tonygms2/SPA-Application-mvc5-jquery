@@ -1,5 +1,4 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SPA_Application.Models;
 using System.Collections.Generic;
 using System.Data;
@@ -59,7 +58,7 @@ namespace SPA_Application.DataAccess
         //public List<User> MapUserData()
         //{
         //    List<User> UserList = new List<User>();
-            
+
         //    using (var connection = new SqlConnection(connectionString))
         //    {
         //        connection.Open();
@@ -67,9 +66,8 @@ namespace SPA_Application.DataAccess
         //    }
 
         //    return UserList;
-            
-        //}
 
+        //}
 
         public List<string> GetAllCustomersFullName()
         {
@@ -95,7 +93,6 @@ namespace SPA_Application.DataAccess
 
             return result;
         }
-
 
         public List<string> GetFullNameFromID()
         {

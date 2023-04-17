@@ -111,7 +111,7 @@ function loadUser() {
             { "title": "Email", data: "Email" },
             {
                 "data": "delete",
-                "orderable":false
+                "orderable": false
                 , "render": function (data, type, row, meta) {
                     return '<button type="button" class="btn btn-danger delete-btn" onclick="deleteUser(' + row.UserID + ')"  id="deleteUser" ' + row.UserID + '">Delete</button>';
                 }
@@ -137,7 +137,7 @@ function loadUser() {
                     if (dt.rows().count() === 0) {
                         alert('No data to export');
                     } else {
-                         // Call the default csvHtml5 action method to create the CSV file
+                        // Call the default csvHtml5 action method to create the CSV file
                         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
                     }
                 },

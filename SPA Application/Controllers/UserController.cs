@@ -46,7 +46,7 @@ namespace SPA_Application.Controllers
                 message = message,
                 success = Convert.ToBoolean(message != "success" ? false : true)
             };
-            var jsonResult = this.Json(js,"JSON", JsonRequestBehavior.AllowGet);
+            var jsonResult = this.Json(js, "JSON", JsonRequestBehavior.AllowGet);
             //var allName = query.GetAllCustomersFullName();
             //var user = query.GetFullNameFromID();
             return jsonResult;
@@ -58,7 +58,6 @@ namespace SPA_Application.Controllers
             {
                 if (int.Parse(user.UserID) == userId)
                 {
-                    
                     return user;
                 }
             }
