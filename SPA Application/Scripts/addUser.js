@@ -101,8 +101,6 @@ function loadUser() {
             "url": "/User/ShowAllUser",
             "type": "POST",
             "dataSrc": function (json) {
-                //var jsonData = JSON.parse(json);
-                //console.log(jsonData.data);
                 return JSON.parse(json.data);
             },
         },
@@ -112,8 +110,9 @@ function loadUser() {
             { "title": "Last Name", data: "LastName" },
             { "title": "Email", data: "Email" },
             {
-                "data": "delete", "render": function (data, type, row, meta) {
-                    
+                "data": "delete",
+                "orderable":false
+                , "render": function (data, type, row, meta) {
                     return '<button type="button" class="btn btn-danger delete-btn" onclick="deleteUser(' + row.UserID + ')"  id="deleteUser" ' + row.UserID + '">Delete</button>';
                 }
             }
@@ -134,15 +133,12 @@ function loadUser() {
                 footer: true,
 
                 action: function (e, dt, button, config) {
-                    
-                    //will check if the data table is empty or not. 
+                    //will check if the data table is empty or not.
                     if (dt.rows().count() === 0) {
                         alert('No data to export');
                     } else {
-
                          // Call the default csvHtml5 action method to create the CSV file
                         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
-                      
                     }
                 },
                 //code for table width
@@ -158,14 +154,12 @@ function loadUser() {
                             return {
                                 columns: [
                                     `Page number ${page} out of ${pages}`,
-                                 
+
                                 ],
                                 margin: [10, 0],
                                 alignment: 'center'
                             }
                         });
-
-
                 }
             }
         ]

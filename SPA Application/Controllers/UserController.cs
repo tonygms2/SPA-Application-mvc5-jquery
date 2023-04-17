@@ -1,15 +1,16 @@
-﻿using System;
+﻿using SPA_Application.DataAccess;
+using SPA_Application.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using Newtonsoft.Json;
-using SPA_Application.Models;
 
 namespace SPA_Application.Controllers
 {
     public class UserController : Controller
     {
+        private Query query;
+
         //Creating a list of User
         private static List<User> userList = new List<User>();
 
@@ -24,6 +25,8 @@ namespace SPA_Application.Controllers
         public JsonResult AddUser(User user)
         {
             AddUserToList(user);
+            query = new Query();
+            query.InsertUser(user);
             return Json(userList, JsonRequestBehavior.AllowGet);
         }
 
@@ -31,23 +34,21 @@ namespace SPA_Application.Controllers
         [HttpPost]
         public JsonResult ShowAllUser()
         {
+            query = new Query();
+
             string message = "success";
 
-            var totalRecords = userList.Count();
-
-            int recFilter = userList.Count();
-
-            string json = JsonConvert.SerializeObject(userList, Formatting.None);
             var js = new
             {
-                recordsTotal = totalRecords,
-                recordsFiltered = recFilter,
-                data = json,
+                recordsTotal = query.GetTotalRecords(),
+                //recordsFiltered = query.GetRecFilter(),
+                data = query.DisplayUserData(),
                 message = message,
                 success = Convert.ToBoolean(message != "success" ? false : true)
             };
-            var jsonResult = this.Json(js, JsonRequestBehavior.AllowGet);
-
+            var jsonResult = this.Json(js,"JSON", JsonRequestBehavior.AllowGet);
+            //var allName = query.GetAllCustomersFullName();
+            //var user = query.GetFullNameFromID();
             return jsonResult;
         }
 
@@ -57,6 +58,7 @@ namespace SPA_Application.Controllers
             {
                 if (int.Parse(user.UserID) == userId)
                 {
+                    
                     return user;
                 }
             }
