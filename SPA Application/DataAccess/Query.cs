@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using SPA_Application.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 
 namespace SPA_Application.DataAccess
 {
@@ -16,8 +16,8 @@ namespace SPA_Application.DataAccess
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 // Create a command object
-                SqlCommand cmd = new SqlCommand("SELECT UserID,FirstName,LastName,Email  FROM UserTable", conn);
-
+                SqlCommand cmd = new SqlCommand("SpDisplayUserData", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
                 // Open the connection
                 conn.Open();
 
@@ -32,105 +32,70 @@ namespace SPA_Application.DataAccess
 
                 // Convert the DataTable into a JSON string
                 // string json = JsonConvert.SerializeObject(dataTable);
-                string json = JsonConvert.SerializeObject(dataTable, Formatting.None);
 
                 // Close the reader and the connection
                 rdr.Close();
                 conn.Close();
-                return json;
+                return JsonConvert.SerializeObject(dataTable, Formatting.None);
             }
+        }
+
+        public void DeleteUser(int userId)
+        {
+            using(SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using(SqlCommand command = new SqlCommand("SpDeletUser",connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    connection.Open();
+                    command.Parameters.Add("@user_id", SqlDbType.VarChar).Value = userId;
+
+                    if (connection.State == ConnectionState.Closed)
+                    {
+                        // Open the connection
+                        connection.Open();
+                    }
+                    command.ExecuteNonQuery();
+                }
+            }
+
         }
 
         public int GetTotalRecords()
         {
-            string sql = "SELECT COUNT(*) FROM UserTable";
-            using (var connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (SqlCommand command = new SqlCommand("SpDisplayUserData", connection))
                 {
+                    //set the type of command
+                    command.CommandType = CommandType.StoredProcedure;
+                    //open a connection
                     connection.Open();
-                    int count = (int)command.ExecuteScalar();
-                    return count;
+                    //initialize SqlDataReader
+                    SqlDataReader rdr = command.ExecuteReader();
+                    //initialize DataTable
+                    DataTable dataTable = new DataTable();
+                    //The query returns 2 table. Second table returns rowcount, thats why we use
+                    //NextResult() to get the next table from the datareader.
+                    rdr.NextResult();
+
+                    // Load the data from the SqlDataReader into the DataTable
+                    dataTable.Load(rdr);
+                    //Get the first row first column of the datatable, get the string and parse to int.
+                    return Convert.ToInt32(dataTable.Rows[0][0].ToString());
                 }
             }
         }
 
-        //public List<User> MapUserData()
-        //{
-        //    List<User> UserList = new List<User>();
-
-        //    using (var connection = new SqlConnection(connectionString))
-        //    {
-        //        connection.Open();
-        //        UserList = connection.Query<User>("SELECT UserID,FirstName,LastName,Email  FROM UserTable").ToList();
-        //    }
-
-        //    return UserList;
-
-        //}
-
-        public List<string> GetAllCustomersFullName()
-        {
-            List<string> result = new List<string>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand("SpGetAllCustomersFullName", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    conn.Open();
-
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            result.Add(rdr.GetString(0));
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public List<string> GetFullNameFromID()
-        {
-            List<string> result = new List<string>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand("GetCustomerByID", conn))
-                {
-                    conn.Open();
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    SqlParameter param = new SqlParameter("@CustomerID", SqlDbType.Int);
-                    param.Value = 999;
-
-                    cmd.Parameters.Add(param);
-
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            string fullName = rdr.GetString(rdr.GetOrdinal("FullName"));
-                            result.Add(fullName);
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
+       
 
         public void InsertUser(User user)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 // Create a command object
-                SqlCommand cmd = new SqlCommand("INSERT INTO UserTable(UserID, FirstName, LastName, Email) VALUES (@user_id, @first_name, @last_name, @email)", conn);
-
+                SqlCommand cmd = new SqlCommand("Sp_InsertUser", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
                 // Open the connection
 
                 // Add the parameters
@@ -151,3 +116,4 @@ namespace SPA_Application.DataAccess
         }
     }
 }
+

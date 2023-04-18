@@ -2,7 +2,6 @@
 using SPA_Application.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 
 namespace SPA_Application.Controllers
@@ -12,22 +11,22 @@ namespace SPA_Application.Controllers
         private Query query;
 
         //Creating a list of User
-        private static List<User> userList = new List<User>();
+        //private static List<User> userList = new List<User>();
 
-        //Adds individual User to the List<User>
-        public void AddUserToList(User user)
+        public string AddUserToList(User user)
         {
-            userList.Add(user);
+            //create a new instance of the query
+            query = new Query();
+            //insert a new user in the InsertUser
+            query.InsertUser(user);
+            return query.DisplayUserData();
         }
 
         //Adds a user to the List<User> and returns the Json
         [HttpPost]
         public JsonResult AddUser(User user)
         {
-            AddUserToList(user);
-            query = new Query();
-            query.InsertUser(user);
-            return Json(userList, JsonRequestBehavior.AllowGet);
+            return Json(AddUserToList(user), JsonRequestBehavior.AllowGet);
         }
 
         //return all JSON Result
@@ -41,48 +40,46 @@ namespace SPA_Application.Controllers
             var js = new
             {
                 recordsTotal = query.GetTotalRecords(),
-                //recordsFiltered = query.GetRecFilter(),
                 data = query.DisplayUserData(),
-                message = message,
+                message,
                 success = Convert.ToBoolean(message != "success" ? false : true)
             };
             var jsonResult = this.Json(js, "JSON", JsonRequestBehavior.AllowGet);
-            //var allName = query.GetAllCustomersFullName();
-            //var user = query.GetFullNameFromID();
+
             return jsonResult;
         }
 
-        public User GetUserById(int userId)
-        {
-            foreach (User user in userList)
-            {
-                if (int.Parse(user.UserID) == userId)
-                {
-                    return user;
-                }
-            }
-            return null;
-        }
+        //public User GetUserById(int userId)
+        //{
+        //    foreach (User user in userList)
+        //    {
+        //        if (int.Parse(user.UserID) == userId)
+        //        {
+        //            return user;
+        //        }
+        //    }
+        //    return null;
+        //}
 
-        [HttpPost]
-        public JsonResult SearchUser(int UserId)
-        {
-            User result = GetUserById(UserId);
+        //[HttpPost]
+        //public JsonResult SearchUser(int UserId)
+        //{
+        //    User result = GetUserById(UserId);
 
-            if (result != null)
-            {
-                return Json(userList, JsonRequestBehavior.AllowGet);
-            }
+        //    if (result != null)
+        //    {
+        //        return Json(userList, JsonRequestBehavior.AllowGet);
+        //    }
 
-            return Json(new { message = "Result Not Found for the id " + UserId });
-        }
+        //    return Json(new { message = "Result Not Found for the id " + UserId });
+        //}
 
         [HttpPost]
         public JsonResult RemoveUser(int UserId)
         {
-            int index = userList.IndexOf(GetUserById(UserId));
-            userList.RemoveAt(index);
-            return Json(userList, JsonRequestBehavior.AllowGet);
+            query = new Query();
+            query.DeleteUser(UserId);
+            return Json(query.DisplayUserData(), JsonRequestBehavior.AllowGet);
         }
 
         // GET: User
@@ -91,21 +88,23 @@ namespace SPA_Application.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonResult EditUser(User user)
-        {
-            User existingUser = GetUserById(int.Parse(user.UserID));
-            if (existingUser != null)
-            {
-                // Update the existing user with the new values
-                existingUser.FirstName = user.FirstName;
-                existingUser.LastName = user.LastName;
-                existingUser.Email = user.Email;
+        //        [HttpPost]
+        //        public JsonResult EditUser(User user)
+        //        {
+        //            User existingUser = GetUserById(int.Parse(user.UserID));
+        //            if (existingUser != null)
+        //            {
+        //                // Update the existing user with the new values
+        //                existingUser.FirstName = user.FirstName;
+        //                existingUser.LastName = user.LastName;
+        //                existingUser.Email = user.Email;
 
-                return Json(userList, JsonRequestBehavior.AllowGet);
-            }
+        //                return Json(userList, JsonRequestBehavior.AllowGet);
+        //            }
 
-            return Json(new { message = "User not found for the id " + user.UserID });
-        }
+        //            return Json(new { message = "User not found for the id " + user.UserID });
+        //        }
+        //    }
+        //}
     }
 }
