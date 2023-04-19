@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SPA_Application.Models;
+﻿using SPA_Application.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,40 +10,50 @@ namespace SPA_Application.DataAccess
     {
         private string connectionString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=UserDatabase;Integrated Security=SSPI";
 
-        public string DisplayUserData()
+        public List<User> DisplayUserData()
         {
+            List<User> UserList = new List<User>();
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 // Create a command object
-                SqlCommand cmd = new SqlCommand("SpDisplayUserData", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("SpDisplayUserData", conn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
                 // Open the connection
                 conn.Open();
 
                 // Execute the query and get the data
                 SqlDataReader rdr = cmd.ExecuteReader();
 
-                // Create a DataTable object to store the data in memory
-                DataTable dataTable = new DataTable();
+                // Iterate through each row in the SqlDataReader
+                while (rdr.Read())
+                {
+                    // Map the column values to the User model
+                    User user = new User();
+                    user.UserID = (rdr["userId"]).ToString();
+                    user.FirstName = rdr["FirstName"].ToString();
+                    user.LastName = rdr["LastName"].ToString();
 
-                // Load the data from the SqlDataReader into the DataTable
-                dataTable.Load(rdr);
+                    user.Email = rdr["Email"].ToString();
 
-                // Convert the DataTable into a JSON string
-                // string json = JsonConvert.SerializeObject(dataTable);
+                    // Add the User object to the list
+                    UserList.Add(user);
+                }
 
                 // Close the reader and the connection
                 rdr.Close();
                 conn.Close();
-                return JsonConvert.SerializeObject(dataTable, Formatting.None);
             }
+            return UserList;
         }
 
         public void DeleteUser(int userId)
         {
-            using(SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                using(SqlCommand command = new SqlCommand("SpDeletUser",connection))
+                using (SqlCommand command = new SqlCommand("SpDeleteUser", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     connection.Open();
@@ -58,7 +67,6 @@ namespace SPA_Application.DataAccess
                     command.ExecuteNonQuery();
                 }
             }
-
         }
 
         public int GetTotalRecords()
@@ -87,33 +95,71 @@ namespace SPA_Application.DataAccess
             }
         }
 
-       
+        public int CheckUserIDExists(int userId)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand("sp_CheckUserIDExists", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    connection.Open();
+                    command.Parameters.Add("@user_id", SqlDbType.VarChar).Value = userId;
 
-        public void InsertUser(User user)
+                    if (connection.State == ConnectionState.Closed)
+                    {
+                        // Open the connection
+                        connection.Open();
+                    }
+                    DataTable datatable = new DataTable();
+                    SqlDataReader rdr = command.ExecuteReader();
+                    datatable.Load(rdr);
+
+                    int doesExist;
+                    if (!int.TryParse(datatable.Rows[0][0].ToString(), out doesExist))
+                    {
+                        // handle the case where the value cannot be parsed to an integer
+                        doesExist = -1;
+                    }
+
+                    return doesExist;
+                }
+            }
+        }
+
+        public int InsertUser(User user)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Create a command object
-                SqlCommand cmd = new SqlCommand("Sp_InsertUser", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                // Open the connection
-
-                // Add the parameters
-                cmd.Parameters.Add("@user_id", SqlDbType.VarChar).Value = user.UserID;
-                cmd.Parameters.Add("@first_name", SqlDbType.VarChar).Value = user.FirstName;
-                cmd.Parameters.Add("@last_name", SqlDbType.VarChar).Value = user.LastName;
-                cmd.Parameters.Add("@email", SqlDbType.VarChar).Value = user.Email;
-
-                if (conn.State == ConnectionState.Closed)
+                if (CheckUserIDExists(int.Parse(user.UserID)) == 0)
                 {
+                    // Create a command object
+                    SqlCommand cmd = new SqlCommand("Sp_InsertUser", conn)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
                     // Open the connection
-                    conn.Open();
-                }
 
-                // Execute the query
-                cmd.ExecuteNonQuery();
+                    // Add the parameters
+                    cmd.Parameters.Add("@user_id", SqlDbType.VarChar).Value = user.UserID;
+                    cmd.Parameters.Add("@first_name", SqlDbType.VarChar).Value = user.FirstName;
+                    cmd.Parameters.Add("@last_name", SqlDbType.VarChar).Value = user.LastName;
+                    cmd.Parameters.Add("@email", SqlDbType.VarChar).Value = user.Email;
+
+                    if (conn.State == ConnectionState.Closed)
+                    {
+                        // Open the connection
+                        conn.Open();
+                    }
+
+                    // Execute the query
+                    cmd.ExecuteNonQuery();
+                    return 0;
+                }
+                else
+                {
+                    return -1;
+                }
             }
         }
     }
 }
-

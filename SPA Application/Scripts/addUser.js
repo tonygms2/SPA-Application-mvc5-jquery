@@ -60,38 +60,48 @@ $(function () {
                 title: 'Oops...',
                 text: 'Please fill all the fields',
             })
-            return;
-        }
-        //Pass the requestData with the value from input field to pass the json Data.
-        let requestData = {
-            UserId: userID,
-            FirstName: firstName,
-            LastName: lastName,
-            Email: email
-        }
-        let emptyData = [];
-        //Adds the json Data using POST method at /User/AddUser
-
-        $.ajax({
-            url: "/User/AddUser",
-            method: "POST",
-            data: requestData,
-            success: function (data) {
-                userTable.ajax.reload();
-                Swal.fire({
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'User has been saved',
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-                // Clear input fields
-                $(".userForm").val('');
-            },
-            error: function (error) {
-                console.error(error);
+        } else {
+            //Pass the requestData with the value from input field to pass the json Data.
+            let requestData = {
+                UserId: userID,
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email
             }
-        });
+
+            //Adds the json Data using POST method at /User/AddUser
+
+            $.ajax({
+                url: "/User/AddUser",
+                method: "POST",
+                data: requestData,
+                success: function (data) {
+                    if (data === "Duplicate UserID") {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'User ID Cannot be duplicate',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    } else {
+                        userTable.ajax.reload();
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'User has been saved',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+                    }
+                    // Clear input fields
+                    $(".userForm").val('');
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
     });
 });
 
@@ -101,7 +111,7 @@ function loadUser() {
             "url": "/User/ShowAllUser",
             "type": "POST",
             "dataSrc": function (json) {
-                return JSON.parse(json.data);
+                return json.data;
             },
         },
         "columns": [
